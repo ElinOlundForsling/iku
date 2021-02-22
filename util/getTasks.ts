@@ -3,9 +3,9 @@ import { GetTasks } from '../types';
 const getTasks: GetTasks = tasks => {
   const parentTasks = tasks
     .filter(t => !t.parent)
-    .map((t, i) => ({
+    .map(t => ({
       id: t.id,
-      index: i,
+      index: t.index,
       price: t.price,
       completed: t.completed,
       name: t.name,
@@ -14,9 +14,9 @@ const getTasks: GetTasks = tasks => {
 
   const subtasks = tasks
     .filter(st => st.parent)
-    .map((st, i) => ({
+    .map(st => ({
       id: st.id,
-      index: i,
+      index: st.index,
       price: st.price,
       completed: st.completed,
       name: st.name,

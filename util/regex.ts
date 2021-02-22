@@ -1,3 +1,5 @@
+import { Regex } from '../types';
+
 export const encodeName: Regex = name => {
   return name.replace(/ /g, '_').concat('_' + Date.now());
 };

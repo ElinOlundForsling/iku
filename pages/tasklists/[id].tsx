@@ -4,23 +4,28 @@ import styles from '../../styles/Home.module.css';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useFirestore, useFirestoreCollectionData } from 'reactfire';
 import CreateTask from '../../components/CreateTask';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, FC } from 'react';
 import getTasks from '../../util/getTasks';
 import TaskList from '../../components/Tasklist';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 interface Props {
   id: string;
 }
 
-const Home: React.FC<Props> = ({ id }) => {
+const Home: FC<Props> = ({ id }) => {
   const [tasklist, setTasklist] = useState([] as Task[]);
+  const [copied, setCopied] = useState(false);
+
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
-    .collection('tasks');
+    .collection('tasks')
+    .orderBy('index');
   const { data } = useFirestoreCollectionData(taskCollection, {
     idField: id,
   });
+  const batch = useFirestore().batch();
 
   useEffect(() => {
     if (data) {
@@ -36,6 +41,30 @@ const Home: React.FC<Props> = ({ id }) => {
     }
   }, [data]);
 
+  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    taskCollection
+      .get()
+      .then(resp => {
+        resp.docs.forEach(docRef => {
+          tasklist.forEach(task => {
+            if (docRef.ref.id === task.id) {
+              batch.update(docRef.ref, {
+                completed: task.completed,
+                index: task.index,
+              });
+            }
+          });
+        });
+        batch.commit().catch(err => console.error(err));
+      })
+      .catch(error => console.error(error));
+  }, [tasklist]);
+
   const name = decodeName(id);
   return (
     <div>
@@ -47,6 +76,10 @@ const Home: React.FC<Props> = ({ id }) => {
       <main className={styles.main}>
         <h1 className={styles.title}>{name}</h1>
         <div>
+          <CopyToClipboard text={id} onCopy={() => setCopied(true)}>
+            <button>Copy to clipboard with button</button>
+          </CopyToClipboard>
+          {copied && <p>Copied!</p>}
           <CreateTask id={id} index={tasklist.length || 0} />
           <TaskList id={id} tasklist={tasklist} setTasklist={setTasklist} />
         </div>
@@ -62,6 +95,7 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   try {
     let id: string = '';
+    let url: string = '';
     if (context.params) {
       id = context.params.id as string;
     }

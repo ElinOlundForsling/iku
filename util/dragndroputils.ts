@@ -18,8 +18,10 @@ let display = 'block';
 
 const isShown: IsShown = (show, completed) => {
   if (show === 'done' && !completed) {
+    console.log('none 1');
     return 'none';
   } else if (show === 'wip' && completed) {
+    console.log('none 2');
     return 'none';
   } else {
     return 'block';
@@ -33,7 +35,7 @@ export const getTaskListStyle: GetTaskListStyle = (
   completed,
 ) => {
   if (show) {
-    display = isShown(show, (completed = false));
+    display = isShown(show, completed || false);
   }
   return {
     userSelect: 'none',

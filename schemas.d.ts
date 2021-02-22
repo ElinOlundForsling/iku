@@ -11,8 +11,3 @@ interface Task {
   parent?: string | null;
   subtasks?: Task[];
 }
-
-interface Return {
-  msg?: string;
-  error?: string;
-}
