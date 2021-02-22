@@ -7,6 +7,9 @@ interface Task {
   name: string;
   completed: boolean;
   price: number;
+  index: number;
+  parent?: string | null;
+  subtasks?: Task[];
 }
 
 interface Return {

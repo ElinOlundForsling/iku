@@ -4,17 +4,37 @@ import styles from '../../styles/Home.module.css';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useFirestore, useFirestoreCollectionData } from 'reactfire';
 import CreateTask from '../../components/CreateTask';
+import { useState, useEffect } from 'react';
+import getTasks from '../../util/getTasks';
+import TaskList from '../../components/Tasklist';
 
 interface Props {
   id: string;
 }
 
 const Home: React.FC<Props> = ({ id }) => {
+  const [tasklist, setTasklist] = useState([] as Task[]);
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
     .collection('tasks');
-  const { data: tasks } = useFirestoreCollectionData(taskCollection);
+  const { data } = useFirestoreCollectionData(taskCollection, {
+    idField: id,
+  });
+
+  useEffect(() => {
+    if (data) {
+      const tasks = data.map(task => ({
+        id: (task.id as string) || 'error',
+        name: (task.name as string) || 'error',
+        completed: (task.completed as boolean) || false,
+        price: (task.price as number) || 0,
+        index: (task.index as number) || 0,
+        parent: (task.parent as string) || null,
+      }));
+      setTasklist(getTasks(tasks));
+    }
+  }, [data]);
 
   const name = decodeName(id);
   return (
@@ -27,7 +47,8 @@ const Home: React.FC<Props> = ({ id }) => {
       <main className={styles.main}>
         <h1 className={styles.title}>{name}</h1>
         <div>
-          <CreateTask id={id} />
+          <CreateTask id={id} index={tasklist.length || 0} />
+          <TaskList id={id} tasklist={tasklist} setTasklist={setTasklist} />
         </div>
       </main>
     </div>

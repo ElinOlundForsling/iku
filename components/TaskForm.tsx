@@ -1,35 +1,40 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { useFirestore } from 'reactfire';
 
-interface CreateTaskInput {
+interface TaskFormProps {
+  id: string;
+  parent: string | null;
+  index: number;
+}
+
+interface CreateTaskProps {
   name: string;
   price: number;
 }
 
-interface Props {
-  id: string;
-  index: number;
-}
-
-const CreateTask: React.FC<Props> = ({ id, index }) => {
-  const { register, handleSubmit, errors } = useForm();
+const TaskForm: FC<TaskFormProps> = ({ id, parent = null, index }) => {
+  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({
+    defaultValues: {
+      price: 0,
+    },
+  });
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
     .collection('tasks')
     .doc();
 
-  const createTask = async (data: CreateTaskInput) => {
+  const createTaskList = async (data: CreateTaskProps) => {
     const { name, price } = data;
-
     try {
       await taskCollection.set({
         name,
         price,
         complete: false,
         id: taskCollection.id,
-        index: index,
+        index,
+        parent: parent,
       });
     } catch (error) {
       console.error(error);
@@ -37,7 +42,7 @@ const CreateTask: React.FC<Props> = ({ id, index }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(createTask)}>
+    <form onSubmit={handleSubmit(createTaskList)}>
       <div>
         <input
           type='text'
@@ -57,9 +62,9 @@ const CreateTask: React.FC<Props> = ({ id, index }) => {
         {errors.price && <p>Price can only be a number</p>}
       </div>
 
-      <button type='submit'>Create Task!</button>
+      <button type='submit'>Create Tasklist!</button>
     </form>
   );
 };
 
-export default CreateTask;
+export default TaskForm;
