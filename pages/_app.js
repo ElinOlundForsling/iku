@@ -1,4 +1,7 @@
+import '../styles/root.css';
 import '../styles/globals.css';
+import '../styles/tasklist.css';
+import '../styles/form.css';
 import { FirebaseAppProvider } from 'reactfire';
 import 'firebase/firestore';
 import 'firebase/auth';

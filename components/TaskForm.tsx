@@ -4,8 +4,8 @@ import { useFirestore } from 'reactfire';
 
 interface TaskFormProps {
   id: string;
-  parent: string | null;
   index: number;
+  parent?: string | null;
 }
 
 interface CreateTaskProps {
@@ -13,12 +13,8 @@ interface CreateTaskProps {
   price: number;
 }
 
-const TaskForm: FC<TaskFormProps> = ({ id, parent = null, index }) => {
-  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({
-    defaultValues: {
-      price: 0,
-    },
-  });
+const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
+  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({});
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
@@ -27,42 +23,41 @@ const TaskForm: FC<TaskFormProps> = ({ id, parent = null, index }) => {
 
   const createTaskList = async (data: CreateTaskProps) => {
     const { name, price } = data;
-    try {
-      await taskCollection.set({
+    await taskCollection
+      .set({
         name,
-        price,
-        complete: false,
+        price: price || 0,
+        completed: false,
         id: taskCollection.id,
         index,
         parent: parent,
+      })
+      .catch(error => {
+        console.error(error);
       });
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   return (
-    <form onSubmit={handleSubmit(createTaskList)}>
-      <div>
-        <input
-          type='text'
-          name='name'
-          placeholder='Task'
-          ref={register({ required: true })}
-        />
-        {errors.name && <p>Required</p>}
-      </div>
-      <div>
-        <input
-          type='text'
-          name='price'
-          placeholder='Price'
-          ref={register({ pattern: /^([0-9]+[0-9 \.]?[0-9]*)$/g })}
-        />
-        {errors.price && <p>Price can only be a number</p>}
-      </div>
+    <form
+      className={parent ? 'tasklist-form' : 'form'}
+      onSubmit={handleSubmit(createTaskList)}>
+      <input
+        type='text'
+        name='name'
+        placeholder={parent ? 'Subtask name' : 'Task name'}
+        ref={register({ required: true })}
+      />
+      {errors.name && <p>Required</p>}
+      <input
+        type='number'
+        name='price'
+        placeholder='Price'
+        step='.01'
+        ref={register()}
+      />
+      {errors.price && <p>Price can only be a number</p>}
 
-      <button type='submit'>Create Tasklist!</button>
+      <button type='submit'>{parent ? 'Add Subtask!' : 'Add Task!'}</button>
     </form>
   );
 };

@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap');
+
+:root {
+  --background: #fff;
+  --main-font: 'Source Sans Pro', sans-serif;
+  --highlight: #f46036;
+  --link: #5b85aa;
+  --link-hover: #414770;
+  --dark: #372248;
+  --darker: #171123;
+}

@@ -1,13 +1,13 @@
 import Head from 'next/head';
 import { decodeName } from '../../util/regex';
-import styles from '../../styles/Home.module.css';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useFirestore, useFirestoreCollectionData } from 'reactfire';
-import CreateTask from '../../components/CreateTask';
+import TaskForm from '../../components/TaskForm';
 import { useState, useEffect, useRef, FC } from 'react';
 import getTasks from '../../util/getTasks';
 import TaskList from '../../components/Tasklist';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { BiCopy } from 'react-icons/bi';
 
 interface Props {
   id: string;
@@ -57,6 +57,15 @@ const Home: FC<Props> = ({ id }) => {
                 completed: task.completed,
                 index: task.index,
               });
+            } else if (task.subtasks && task.subtasks.length > 0) {
+              task.subtasks.forEach(subtask => {
+                if (docRef.ref.id === subtask.id) {
+                  batch.update(docRef.ref, {
+                    completed: subtask.completed,
+                    index: subtask.index,
+                  });
+                }
+              });
             }
           });
         });
@@ -73,16 +82,34 @@ const Home: FC<Props> = ({ id }) => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>{name}</h1>
-        <div>
-          <CopyToClipboard text={id} onCopy={() => setCopied(true)}>
-            <button>Copy to clipboard with button</button>
-          </CopyToClipboard>
+      <main className='main'>
+        <h1 className='title'>{name}</h1>
+        <article className='container'>
           {copied && <p>Copied!</p>}
-          <CreateTask id={id} index={tasklist.length || 0} />
-          <TaskList id={id} tasklist={tasklist} setTasklist={setTasklist} />
-        </div>
+          <TaskForm id={id} index={tasklist.length || 0} />
+          <hr />
+          {tasklist.length > 0 ? (
+            <TaskList id={id} tasklist={tasklist} setTasklist={setTasklist} />
+          ) : (
+            <p>No tasks yet, add some above!</p>
+          )}
+          <hr />
+          <form className='copy-form'>
+            <p>Copy the url to this list:</p>
+            <input
+              type='text'
+              value={`https://iku.vercel.app/tasklists/${id}`}
+              readOnly
+            />
+            <CopyToClipboard
+              text={`https://iku.vercel.app/tasklists/${id}`}
+              onCopy={() => setCopied(true)}>
+              <button>
+                <BiCopy />
+              </button>
+            </CopyToClipboard>
+          </form>
+        </article>
       </main>
     </div>
   );

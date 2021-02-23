@@ -26,24 +26,25 @@ const CreateTaskList = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(createTaskList)}>
-      <div>
-        <input
-          type='text'
-          id='name'
-          name='name'
-          placeholder='Tasklist name...'
-          ref={register({ required: true, pattern: /^[A-Z][\w \s ]+/i })}
-        />
-        {errors.name && (
-          <p>
-            Name must start with a letter and only contain letters, numbers,
-            underscores and whitespaces
-          </p>
-        )}
-      </div>
+    <form className='form' onSubmit={handleSubmit(createTaskList)}>
+      <input
+        type='text'
+        id='name'
+        name='name'
+        placeholder='Enter tasklist name...'
+        autoComplete='off'
+        ref={register({ required: true, pattern: /^[A-Z][\w \s ]+/i })}
+      />
+      {errors.name && (
+        <p>
+          Name must start with a letter and only contain letters, numbers,
+          underscores and whitespaces
+        </p>
+      )}
 
-      <button type='submit'>Create Tasklist!</button>
+      <button className='btn btn1' type='submit'>
+        Create
+      </button>
     </form>
   );
 };

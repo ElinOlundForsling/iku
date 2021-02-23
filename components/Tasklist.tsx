@@ -5,13 +5,10 @@ import {
   Draggable,
   DropResult,
 } from 'react-beautiful-dnd';
-import {
-  reorder,
-  getTaskListStyle,
-  getParentTaskStyle,
-} from '../util/dragndroputils';
+import { reorder } from '../util/dragndroputils';
 import Subtasks from './Subtasks';
 import { FaGripVertical } from 'react-icons/fa';
+import { AiFillEdit } from 'react-icons/ai';
 import Show from './Show';
 import TaskForm from './TaskForm';
 
@@ -28,10 +25,41 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
     const newTasks = tasklist.map(task => {
       if (task.id === e.target.id) {
         task.completed = !task.completed;
+        if (task.subtasks) {
+          task.subtasks.map(subtask => {
+            subtask.completed = task.completed;
+          });
+        }
       }
       return task;
     });
 
+    setTasklist(newTasks);
+  };
+
+  const onSubChecked = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    parent: string,
+  ) => {
+    const newTasks = tasklist.map((task: Task) => {
+      if (task.id === parent) {
+        if (task.subtasks) {
+          task.subtasks.map((subtask: Task) => {
+            if (subtask.id === e.target.id) {
+              subtask.completed = !subtask.completed;
+            }
+            if (!subtask.completed && task.completed) {
+              task.completed = false;
+            }
+            return subtask;
+          });
+          if (task.subtasks.every(subtask => subtask.completed)) {
+            task.completed = true;
+          }
+        }
+      }
+      return task;
+    });
     setTasklist(newTasks);
   };
 
@@ -63,49 +91,76 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
     }
   };
 
+  const isShown = (completed: boolean) => {
+    if (show === 'done' && !completed) {
+      return false;
+    } else if (show === 'wip' && completed) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   return (
-    <>
+    <div className='tasklist-container'>
       <Show show={show} setShow={setShow} />
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId='droppable' type='TASKS'>
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
-              style={getParentTaskStyle(snapshot.isDraggingOver)}>
+              className={`tasklist ${
+                snapshot.isDraggingOver && 'tasklist-dragging'
+              }`}>
               {tasklist.map((task, index) => (
                 <Draggable key={task.id} draggableId={task.id} index={index}>
                   {(provided, snapshot) => (
                     <div
+                      className={`task ${
+                        snapshot.isDragging ? 'task-dragging' : ''
+                      } ${isShown(task.completed) ? '' : 'no-display'}`}
                       ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      style={getTaskListStyle(
-                        snapshot.isDragging,
-                        provided.draggableProps,
-                        show,
-                        task.completed,
-                      )}>
-                      {task.name}{' '}
-                      {task.subtasks
-                        ? task.price +
-                          task.subtasks
-                            .map(t => Number(t.price))
-                            .reduce(
-                              (accumulator, currentValue) =>
-                                accumulator + currentValue,
-                              0,
-                            )
-                        : task.price}{' '}
-                      <input
-                        type='checkbox'
-                        id={task.id}
-                        name='completed'
-                        checked={task.completed}
-                        onChange={onChecked}></input>
+                      {...provided.draggableProps}>
                       <span {...provided.dragHandleProps}>
                         <FaGripVertical />
                       </span>
-                      {task.subtasks && (
-                        <Subtasks taskNum={index} task={task} />
+
+                      <input
+                        id={task.id}
+                        data-testid='task-checkbox'
+                        type='checkbox'
+                        checked={task.completed}
+                        onChange={onChecked}
+                      />
+                      <label htmlFor={task.id}>{task.name}</label>
+                      <AiFillEdit />
+                      <span className='right'>
+                        <p>
+                          Base Price: <strong>{Number(task.price)}</strong>
+                        </p>
+
+                        {task.subtasks && task.subtasks.length > 0 && (
+                          <p>
+                            Total Price:{' '}
+                            <strong>
+                              {Number(task.price) +
+                                task.subtasks
+                                  .map(t => Number(t.price))
+                                  .reduce(
+                                    (accumulator, currentValue) =>
+                                      accumulator + currentValue,
+                                    0,
+                                  )}
+                            </strong>
+                          </p>
+                        )}
+                      </span>
+                      {task.subtasks && task.subtasks.length > 0 && (
+                        <Subtasks
+                          taskNum={index}
+                          task={task}
+                          onSubChecked={onSubChecked}
+                        />
                       )}
                       <TaskForm
                         id={id}
@@ -121,7 +176,7 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
           )}
         </Droppable>
       </DragDropContext>
-    </>
+    </div>
   );
 };
 

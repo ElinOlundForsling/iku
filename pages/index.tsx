@@ -11,11 +11,11 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>IKU いく</h1>
-        <CreateTaskList />
+        <div className={styles.home}>
+          <h1 className={styles.title}>IKU いく</h1>
+          <CreateTaskList />
+        </div>
       </main>
-
-      <footer className={styles.footer}>hello im footer</footer>
     </div>
   );
 }
