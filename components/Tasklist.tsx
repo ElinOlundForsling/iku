@@ -86,7 +86,7 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
     }
 
     if (result.type === 'TASKS') {
-      let reorderedTasks = reorder(
+      const reorderedTasks = reorder(
         tasklist,
         result.source.index,
         result.destination.index,

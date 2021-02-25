@@ -2,7 +2,7 @@ import Head from 'next/head';
 import CreateTaskList from '../components/CreateTaskList';
 import styles from '../styles/Home.module.css';
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div className={styles.container}>
       <Head>
@@ -18,4 +18,6 @@ export default function Home() {
       </main>
     </div>
   );
-}
+};
+
+export default Home;

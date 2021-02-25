@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { encodeName } from '../util/regex';
@@ -8,7 +8,7 @@ interface CreateTaskListInput {
   name: string;
 }
 
-const CreateTaskList = () => {
+const CreateTaskList: FC = () => {
   const { register, handleSubmit, errors } = useForm();
   const tasklistCollection = useFirestore().collection('tasklists');
   const router = useRouter();

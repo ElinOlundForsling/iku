@@ -165,7 +165,7 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
   try {
-    let id: string = '';
+    let id = '';
     if (context.params) {
       id = context.params.id as string;
     }

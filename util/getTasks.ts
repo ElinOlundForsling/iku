@@ -1,5 +1,3 @@
-import { GetTasks } from '../types';
-
 const getTasks: GetTasks = tasks => {
   const parentTasks = tasks
     .filter(t => !t.parent)
