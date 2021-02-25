@@ -75,6 +75,28 @@ const Home: FC<Props> = ({ id }) => {
   }, [tasklist]);
 
   const name = decodeName(id);
+
+  const copyToClipboard = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    event.preventDefault();
+    const url = `https://iku.vercel.app/tasklists/${id}`;
+
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        if (!copied) {
+          setCopied(true);
+          setTimeout(() => {
+            setCopied(false);
+          }, 1500);
+        }
+      })
+      .catch(err => {
+        console.log('Something went wrong', err);
+      });
+  };
+
   return (
     <div>
       <Head>
@@ -101,13 +123,11 @@ const Home: FC<Props> = ({ id }) => {
               value={`https://iku.vercel.app/tasklists/${id}`}
               readOnly
             />
-            <CopyToClipboard
-              text={`https://iku.vercel.app/tasklists/${id}`}
-              onCopy={() => setCopied(true)}>
-              <button>
-                <BiCopy />
-              </button>
-            </CopyToClipboard>
+
+            <button onClick={copyToClipboard}>
+              <BiCopy />
+            </button>
+            {copied && 'Copied!'}
           </form>
         </article>
       </main>

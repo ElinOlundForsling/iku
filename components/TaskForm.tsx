@@ -20,6 +20,10 @@ const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
     .doc(id)
     .collection('tasks')
     .doc();
+  const tasklistCollection = useFirestore()
+    .collection('tasklists')
+    .doc(id)
+    .collection('tasks');
 
   const createTaskList = async (data: CreateTaskProps) => {
     const { name, price } = data;
@@ -35,6 +39,14 @@ const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
       .catch(error => {
         console.error(error);
       });
+    if (parent) {
+      await tasklistCollection
+        .doc(parent)
+        .set({ completed: false }, { merge: true })
+        .catch(error => {
+          console.error(error);
+        });
+    }
   };
 
   return (

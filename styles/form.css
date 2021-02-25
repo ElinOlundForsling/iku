@@ -4,7 +4,7 @@
   margin: 5px 0px;
   font-family: var(--main-font);
   letter-spacing: 0.08rem;
-  background-color: #f7f7f9;
+  background-color: var(--input-background);
   border: 0 solid #ced4da;
 }
 
@@ -49,15 +49,25 @@ input::-webkit-inner-spin-button {
 }
 
 .copy-form input {
-  width: 80%;
-  height: 30px;
+  width: 90%;
+  height: 40px;
   margin: 0;
   padding: 5px;
+  background-color: var(--input-background);
+  border: none;
+  font-family: var(--main-font);
 }
 
 .copy-form button {
-  width: 20%;
-  height: 30px;
+  width: 10%;
+  height: 40px;
   margin: 0;
   padding: 5px;
+  background-color: #000;
+  color: var(--background);
+  border: none;
+}
+
+.copy-form button:hover {
+  background-color: var(--highlight);
 }
