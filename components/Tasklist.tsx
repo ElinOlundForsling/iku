@@ -20,7 +20,8 @@ interface Props {
 }
 
 const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
-  const [show, setShow] = useState('all');
+  const [show, setShow] = useState<string>('all');
+  const [edit, setEdit] = useState<string | null>(null);
 
   const taskCollection = useFirestore()
     .collection('tasklists')
@@ -54,14 +55,8 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
             if (subtask.id === e.target.id) {
               subtask.completed = !subtask.completed;
             }
-            if (!subtask.completed && task.completed) {
-              task.completed = false;
-            }
             return subtask;
           });
-          if (task.subtasks.every(subtask => subtask.completed)) {
-            task.completed = true;
-          }
         }
       }
       return task;
@@ -69,19 +64,19 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
     setTasklist(newTasks);
   };
 
-  const onDelete = (
+  const onDelete = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     subtasks?: Task[],
   ) => {
     event.preventDefault();
     const target = event.target as HTMLButtonElement;
     if (subtasks) {
-      subtasks.map((subtask: Task) => {
+      await subtasks.map((subtask: Task) => {
         taskCollection.doc(subtask.id).delete();
       });
     }
     if (target.id) {
-      taskCollection.doc((event.target as HTMLElement).id).delete();
+      await taskCollection.doc((event.target as HTMLElement).id).delete();
     }
   };
 
@@ -147,52 +142,75 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
                         <FaGripVertical />
                       </span>
 
-                      <input
-                        id={task.id}
-                        data-testid='task-checkbox'
-                        type='checkbox'
-                        checked={task.completed}
-                        onChange={onChecked}
-                      />
-                      <label htmlFor={task.id}>{task.name}</label>
-                      <AiFillEdit />
-                      <span className='right'>
-                        <p>
-                          Base Price: <strong>{Number(task.price)}</strong>
+                      {edit === task.id ? (
+                        <TaskForm
+                          id={id}
+                          index={task.index}
+                          parent={null}
+                          task={task}
+                          setEdit={setEdit}
+                        />
+                      ) : (
+                        <>
+                          <input
+                            id={task.id}
+                            data-testid='task-checkbox'
+                            type='checkbox'
+                            checked={task.completed}
+                            onChange={onChecked}
+                          />
+                          <label htmlFor={task.id}>{task.name}</label>
                           <button
                             id={task.id}
                             className='tasklist-btn'
-                            onClick={event =>
-                              onDelete(event, task.subtasks && task.subtasks)
-                            }>
-                            <FaTrashAlt />
+                            onClick={() => setEdit(task.id)}>
+                            <AiFillEdit />
                           </button>
-                        </p>
-
-                        {task.subtasks && task.subtasks.length > 0 && (
-                          <p>
-                            Total Price:{' '}
-                            <strong>
-                              {(
-                                Number(task.price) +
-                                task.subtasks
-                                  .map(t => Number(t.price))
-                                  .reduce(
-                                    (accumulator, currentValue) =>
-                                      accumulator + currentValue,
-                                    0,
+                          <span className='right'>
+                            <p>
+                              Base Price: <strong>{Number(task.price)}</strong>
+                              <button
+                                id={task.id}
+                                className='tasklist-btn'
+                                onClick={event =>
+                                  onDelete(
+                                    event,
+                                    task.subtasks && task.subtasks,
                                   )
-                              ).toFixed(2)}
-                            </strong>
-                          </p>
-                        )}
-                      </span>
+                                }>
+                                <FaTrashAlt />
+                              </button>
+                            </p>
+
+                            {task.subtasks && task.subtasks.length > 0 && (
+                              <p>
+                                Total Price:{' '}
+                                <strong>
+                                  {(
+                                    Number(task.price) +
+                                    task.subtasks
+                                      .map(t => Number(t.price))
+                                      .reduce(
+                                        (accumulator, currentValue) =>
+                                          accumulator + currentValue,
+                                        0,
+                                      )
+                                  ).toFixed(2)}
+                                </strong>
+                              </p>
+                            )}
+                          </span>
+                        </>
+                      )}
                       {task.subtasks && task.subtasks.length > 0 && (
                         <Subtasks
+                          id={id}
                           taskNum={index}
                           task={task}
                           onSubChecked={onSubChecked}
                           onDelete={onDelete}
+                          edit={edit}
+                          setEdit={setEdit}
                         />
                       )}
                       <TaskForm

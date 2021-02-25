@@ -73,6 +73,8 @@
 .tasklist-btn {
   background-color: transparent;
   border: none;
+  margin: 0;
+  padding: 0;
 }
 
 .tasklist-btn:hover {

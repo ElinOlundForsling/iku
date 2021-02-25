@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, Dispatch, SetStateAction } from 'react';
 import {
   Droppable,
   Draggable,
@@ -6,8 +6,11 @@ import {
   DraggableStateSnapshot,
 } from 'react-beautiful-dnd';
 import { FaGripVertical, FaTrashAlt } from 'react-icons/fa';
+import { AiFillEdit } from 'react-icons/ai';
+import TaskForm from './TaskForm';
 
 interface Props {
+  id: string;
   task: Task;
   taskNum: number;
   onSubChecked: (
@@ -15,9 +18,19 @@ interface Props {
     parent: string,
   ) => void;
   onDelete: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  edit: string | null;
+  setEdit: Dispatch<SetStateAction<string | null>>;
 }
 
-const Subtasks: FC<Props> = ({ task, taskNum, onSubChecked, onDelete }) => {
+const Subtasks: FC<Props> = ({
+  id,
+  task,
+  taskNum,
+  onSubChecked,
+  onDelete,
+  edit,
+  setEdit,
+}) => {
   return (
     <Droppable droppableId={`droppable${task.id}`} type={`${taskNum}`}>
       {(provided, snapshot) => (
@@ -54,30 +67,55 @@ const Subtasks: FC<Props> = ({ task, taskNum, onSubChecked, onDelete }) => {
                                 <FaGripVertical />
                               </span>
                             </th>
-                            <td>
-                              <input
-                                type='checkbox'
-                                id={subtask.id}
-                                name='completed'
-                                checked={subtask.completed}
-                                onChange={e => onSubChecked(e, subtask.parent!)}
-                              />
-                              <label htmlFor={subtask.id}>{subtask.name}</label>
-                            </td>
-                            <td>
-                              <span className='right'>
-                                <p>
-                                  Price: <strong>{subtask.price}</strong>
-                                  &nbsp;&nbsp;
+
+                            {edit === subtask.id ? (
+                              <td>
+                                <TaskForm
+                                  id={id}
+                                  index={subtask.index}
+                                  parent={subtask.parent}
+                                  task={subtask}
+                                  setEdit={setEdit}
+                                />
+                              </td>
+                            ) : (
+                              <>
+                                <td>
+                                  <input
+                                    type='checkbox'
+                                    id={subtask.id}
+                                    name='completed'
+                                    checked={subtask.completed}
+                                    onChange={e =>
+                                      onSubChecked(e, subtask.parent!)
+                                    }
+                                  />
+                                  <label htmlFor={subtask.id}>
+                                    {subtask.name}
+                                  </label>
                                   <button
                                     id={subtask.id}
                                     className='tasklist-btn'
-                                    onClick={onDelete}>
-                                    <FaTrashAlt />
+                                    onClick={() => setEdit(subtask.id)}>
+                                    <AiFillEdit />
                                   </button>
-                                </p>
-                              </span>
-                            </td>
+                                </td>
+                                <td>
+                                  <span className='right'>
+                                    <p>
+                                      Price: <strong>{subtask.price}</strong>
+                                      &nbsp;&nbsp;
+                                      <button
+                                        id={subtask.id}
+                                        className='tasklist-btn'
+                                        onClick={onDelete}>
+                                        <FaTrashAlt />
+                                      </button>
+                                    </p>
+                                  </span>
+                                </td>
+                              </>
+                            )}
                           </tr>
                         </tbody>
                       </table>

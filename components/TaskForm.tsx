@@ -1,11 +1,14 @@
-import React, { FC } from 'react';
+import React, { FC, Dispatch, SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { useFirestore } from 'reactfire';
+import { IoClose } from 'react-icons/io5';
 
 interface TaskFormProps {
   id: string;
   index: number;
   parent?: string | null;
+  task?: Task;
+  setEdit?: Dispatch<SetStateAction<string | null>>;
 }
 
 interface CreateTaskProps {
@@ -13,8 +16,19 @@ interface CreateTaskProps {
   price: number;
 }
 
-const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
-  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({});
+const TaskForm: FC<TaskFormProps> = ({
+  id,
+  index,
+  parent = null,
+  task,
+  setEdit,
+}) => {
+  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({
+    defaultValues: {
+      name: task ? task.name : undefined,
+      price: task ? task.price : undefined,
+    },
+  });
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
@@ -27,31 +41,50 @@ const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
 
   const createTaskList = async (data: CreateTaskProps) => {
     const { name, price } = data;
-    await taskCollection
-      .set({
-        name,
-        price: price || 0,
-        completed: false,
-        id: taskCollection.id,
-        index,
-        parent: parent,
-      })
-      .catch(error => {
-        console.error(error);
-      });
-    if (parent) {
+    if (task && setEdit) {
       await tasklistCollection
-        .doc(parent)
-        .set({ completed: false }, { merge: true })
+        .doc(task.id)
+        .set(
+          {
+            name,
+            price: price || 0,
+          },
+          { merge: true },
+        )
         .catch(error => {
           console.error(error);
         });
+      setEdit(null);
+    } else {
+      await taskCollection
+        .set(
+          {
+            name,
+            price: price || 0,
+            completed: false,
+            id: taskCollection.id,
+            index,
+            parent: parent,
+          },
+          { merge: true },
+        )
+        .catch(error => {
+          console.error(error);
+        });
+      if (parent) {
+        await tasklistCollection
+          .doc(parent)
+          .set({ completed: false }, { merge: true })
+          .catch(error => {
+            console.error(error);
+          });
+      }
     }
   };
 
   return (
     <form
-      className={parent ? 'tasklist-form' : 'form'}
+      className={task ? 'tasklist-form' : parent ? 'tasklist-form' : 'form'}
       onSubmit={handleSubmit(createTaskList)}>
       <input
         type='text'
@@ -69,7 +102,14 @@ const TaskForm: FC<TaskFormProps> = ({ id, index, parent = null }) => {
       />
       {errors.price && <p>Price can only be a number</p>}
 
-      <button type='submit'>{parent ? 'Add Subtask!' : 'Add Task!'}</button>
+      <button type='submit'>
+        {task ? 'Edit' : parent ? 'Add Subtask!' : 'Add Task!'}
+      </button>
+      {setEdit && (
+        <button onClick={() => setEdit(null)}>
+          <IoClose />
+        </button>
+      )}
     </form>
   );
 };

@@ -47,11 +47,12 @@ const Home: FC<Props> = ({ id }) => {
       isFirstRun.current = false;
       return;
     }
+    const checkedTaskList = parentCheck();
     taskCollection
       .get()
       .then(resp => {
         resp.docs.forEach(docRef => {
-          tasklist.forEach(task => {
+          checkedTaskList.forEach(task => {
             if (docRef.ref.id === task.id) {
               batch.update(docRef.ref, {
                 completed: task.completed,
@@ -70,9 +71,24 @@ const Home: FC<Props> = ({ id }) => {
           });
         });
         batch.commit().catch(err => console.error(err));
+        console.log('write');
       })
       .catch(error => console.error(error));
   }, [tasklist]);
+
+  const parentCheck = () => {
+    const newTasklist = tasklist.map(task => {
+      if (task.subtasks) {
+        if (task.subtasks.every(subtask => subtask.completed)) {
+          task.completed = true;
+        } else if (task.subtasks.some(subtask => !subtask.completed)) {
+          task.completed = false;
+        }
+      }
+      return task;
+    });
+    return newTasklist;
+  };
 
   const name = decodeName(id);
 
