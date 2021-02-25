@@ -6,8 +6,9 @@ import {
   DropResult,
 } from 'react-beautiful-dnd';
 import { reorder } from '../util/dragndroputils';
+import { useFirestore } from 'reactfire';
 import Subtasks from './Subtasks';
-import { FaGripVertical } from 'react-icons/fa';
+import { FaGripVertical, FaTrashAlt } from 'react-icons/fa';
 import { AiFillEdit } from 'react-icons/ai';
 import Show from './Show';
 import TaskForm from './TaskForm';
@@ -20,6 +21,11 @@ interface Props {
 
 const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
   const [show, setShow] = useState('all');
+
+  const taskCollection = useFirestore()
+    .collection('tasklists')
+    .doc(id)
+    .collection('tasks');
 
   const onChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTasks = tasklist.map(task => {
@@ -61,6 +67,22 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
       return task;
     });
     setTasklist(newTasks);
+  };
+
+  const onDelete = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    subtasks?: Task[],
+  ) => {
+    event.preventDefault();
+    const target = event.target as HTMLButtonElement;
+    if (subtasks) {
+      subtasks.map((subtask: Task) => {
+        taskCollection.doc(subtask.id).delete();
+      });
+    }
+    if (target.id) {
+      taskCollection.doc((event.target as HTMLElement).id).delete();
+    }
   };
 
   const onDragEnd = (result: DropResult) => {
@@ -137,20 +159,30 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
                       <span className='right'>
                         <p>
                           Base Price: <strong>{Number(task.price)}</strong>
+                          <button
+                            id={task.id}
+                            className='tasklist-btn'
+                            onClick={event =>
+                              onDelete(event, task.subtasks && task.subtasks)
+                            }>
+                            <FaTrashAlt />
+                          </button>
                         </p>
 
                         {task.subtasks && task.subtasks.length > 0 && (
                           <p>
                             Total Price:{' '}
                             <strong>
-                              {Number(task.price) +
+                              {(
+                                Number(task.price) +
                                 task.subtasks
                                   .map(t => Number(t.price))
                                   .reduce(
                                     (accumulator, currentValue) =>
                                       accumulator + currentValue,
                                     0,
-                                  )}
+                                  )
+                              ).toFixed(2)}
                             </strong>
                           </p>
                         )}
@@ -160,6 +192,7 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
                           taskNum={index}
                           task={task}
                           onSubChecked={onSubChecked}
+                          onDelete={onDelete}
                         />
                       )}
                       <TaskForm

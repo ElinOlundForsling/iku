@@ -70,6 +70,17 @@
   margin: 0.1em;
 }
 
+.tasklist-btn {
+  background-color: transparent;
+  border: none;
+}
+
+.tasklist-btn:hover {
+  background-color: transparent;
+  border: none;
+  color: var(--highlight);
+}
+
 .tasklist-form {
   display: flex;
   flex-direction: row;

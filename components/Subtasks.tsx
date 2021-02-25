@@ -5,18 +5,19 @@ import {
   DraggableProvided,
   DraggableStateSnapshot,
 } from 'react-beautiful-dnd';
-import { FaGripVertical } from 'react-icons/fa';
+import { FaGripVertical, FaTrashAlt } from 'react-icons/fa';
 
 interface Props {
   task: Task;
   taskNum: number;
   onSubChecked: (
-    e: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
     parent: string,
   ) => void;
+  onDelete: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const Subtasks: FC<Props> = ({ task, taskNum, onSubChecked }) => {
+const Subtasks: FC<Props> = ({ task, taskNum, onSubChecked, onDelete }) => {
   return (
     <Droppable droppableId={`droppable${task.id}`} type={`${taskNum}`}>
       {(provided, snapshot) => (
@@ -67,6 +68,13 @@ const Subtasks: FC<Props> = ({ task, taskNum, onSubChecked }) => {
                               <span className='right'>
                                 <p>
                                   Price: <strong>{subtask.price}</strong>
+                                  &nbsp;&nbsp;
+                                  <button
+                                    id={subtask.id}
+                                    className='tasklist-btn'
+                                    onClick={onDelete}>
+                                    <FaTrashAlt />
+                                  </button>
                                 </p>
                               </span>
                             </td>
