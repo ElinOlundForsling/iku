@@ -6,7 +6,6 @@ import TaskForm from '../../components/TaskForm';
 import { useState, useEffect, useRef, FC } from 'react';
 import getTasks from '../../util/getTasks';
 import TaskList from '../../components/Tasklist';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BiCopy } from 'react-icons/bi';
 
 interface Props {
@@ -167,7 +166,6 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   try {
     let id: string = '';
-    let url: string = '';
     if (context.params) {
       id = context.params.id as string;
     }

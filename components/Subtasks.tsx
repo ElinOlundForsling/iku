@@ -57,16 +57,16 @@ const Subtasks: FC<Props> = ({
                       className={`subtask ${
                         snapshot.isDragging && 'subtask-dragging'
                       }`}>
-                      <table>
+                      <table className='task-table'>
                         <tbody>
                           <tr>
-                            <th>
+                            <td className='task-table-inverse task-table-grip'>
                               <span
                                 {...provided.dragHandleProps}
                                 className='subtask-grip'>
                                 <FaGripVertical />
                               </span>
-                            </th>
+                            </td>
 
                             {edit === subtask.id ? (
                               <td>
@@ -80,7 +80,7 @@ const Subtasks: FC<Props> = ({
                               </td>
                             ) : (
                               <>
-                                <td>
+                                <td className='table-expand'>
                                   <input
                                     type='checkbox'
                                     id={subtask.id}
@@ -101,18 +101,18 @@ const Subtasks: FC<Props> = ({
                                   </button>
                                 </td>
                                 <td>
-                                  <span className='right'>
-                                    <p>
-                                      Price: <strong>{subtask.price}</strong>
-                                      &nbsp;&nbsp;
-                                      <button
-                                        id={subtask.id}
-                                        className='tasklist-btn'
-                                        onClick={onDelete}>
-                                        <FaTrashAlt />
-                                      </button>
-                                    </p>
-                                  </span>
+                                  <p>
+                                    Price: <strong>{subtask.price}</strong>
+                                    &nbsp;&nbsp;
+                                  </p>
+                                </td>
+                                <td>
+                                  <button
+                                    id={subtask.id}
+                                    className='tasklist-btn'
+                                    onClick={onDelete}>
+                                    <FaTrashAlt />
+                                  </button>
                                 </td>
                               </>
                             )}

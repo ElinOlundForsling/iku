@@ -23,12 +23,14 @@ const TaskForm: FC<TaskFormProps> = ({
   task,
   setEdit,
 }) => {
-  const { register, handleSubmit, errors } = useForm<CreateTaskProps>({
-    defaultValues: {
-      name: task ? task.name : undefined,
-      price: task ? task.price : undefined,
+  const { register, handleSubmit, errors, setValue } = useForm<CreateTaskProps>(
+    {
+      defaultValues: {
+        name: task ? task.name : undefined,
+        price: task ? task.price : undefined,
+      },
     },
-  });
+  );
   const taskCollection = useFirestore()
     .collection('tasklists')
     .doc(id)
@@ -80,37 +82,42 @@ const TaskForm: FC<TaskFormProps> = ({
           });
       }
     }
+    setValue('name', '');
+    setValue('price', '');
   };
 
   return (
-    <form
-      className={task ? 'tasklist-form' : parent ? 'tasklist-form' : 'form'}
-      onSubmit={handleSubmit(createTaskList)}>
-      <input
-        type='text'
-        name='name'
-        placeholder={parent ? 'Subtask name' : 'Task name'}
-        ref={register({ required: true })}
-      />
-      {errors.name && <p>Required</p>}
-      <input
-        type='number'
-        name='price'
-        placeholder='Price'
-        step='.01'
-        ref={register()}
-      />
+    <>
+      {errors.name && <p className='message'>Name is Required</p>}
       {errors.price && <p>Price can only be a number</p>}
+      <form
+        className={task ? 'tasklist-form' : parent ? 'tasklist-form' : 'form'}
+        onSubmit={handleSubmit(createTaskList)}>
+        <input
+          type='text'
+          name='name'
+          placeholder={parent ? 'Subtask name' : 'Task name'}
+          ref={register({ required: true })}
+        />
 
-      <button type='submit'>
-        {task ? 'Edit' : parent ? 'Add Subtask!' : 'Add Task!'}
-      </button>
-      {setEdit && (
-        <button onClick={() => setEdit(null)}>
-          <IoClose />
+        <input
+          type='number'
+          name='price'
+          placeholder='Price'
+          step='.01'
+          ref={register()}
+        />
+
+        <button type='submit'>
+          {task ? 'Edit' : parent ? 'Add Subtask!' : 'Add Task!'}
         </button>
-      )}
-    </form>
+        {setEdit && (
+          <button className='btn-close' onClick={() => setEdit(null)}>
+            <IoClose />
+          </button>
+        )}
+      </form>
+    </>
   );
 };
 

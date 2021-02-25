@@ -138,70 +138,86 @@ const TaskList: FC<Props> = ({ id, tasklist, setTasklist }) => {
                       } ${isShown(task.completed) ? '' : 'no-display'}`}
                       ref={provided.innerRef}
                       {...provided.draggableProps}>
-                      <span {...provided.dragHandleProps}>
-                        <FaGripVertical />
-                      </span>
+                      <table className='task-table'>
+                        <tbody>
+                          <tr>
+                            <td className='task-table-grip'>
+                              <span {...provided.dragHandleProps}>
+                                <FaGripVertical />
+                              </span>
+                            </td>
+                            {edit === task.id ? (
+                              <td>
+                                <TaskForm
+                                  id={id}
+                                  index={task.index}
+                                  parent={null}
+                                  task={task}
+                                  setEdit={setEdit}
+                                />
+                              </td>
+                            ) : (
+                              <>
+                                <td className='table-expand'>
+                                  <input
+                                    id={task.id}
+                                    data-testid='task-checkbox'
+                                    type='checkbox'
+                                    checked={task.completed}
+                                    onChange={onChecked}
+                                  />
+                                  <label htmlFor={task.id}>{task.name}</label>
+                                  <button
+                                    id={task.id}
+                                    className='tasklist-btn'
+                                    onClick={() => setEdit(task.id)}>
+                                    <AiFillEdit />
+                                  </button>
+                                </td>
+                                <td>
+                                  <p>
+                                    Base Price:{' '}
+                                    <strong>
+                                      {Number(task.price).toFixed(2)}
+                                    </strong>
+                                  </p>
 
-                      {edit === task.id ? (
-                        <TaskForm
-                          id={id}
-                          index={task.index}
-                          parent={null}
-                          task={task}
-                          setEdit={setEdit}
-                        />
-                      ) : (
-                        <>
-                          <input
-                            id={task.id}
-                            data-testid='task-checkbox'
-                            type='checkbox'
-                            checked={task.completed}
-                            onChange={onChecked}
-                          />
-                          <label htmlFor={task.id}>{task.name}</label>
-                          <button
-                            id={task.id}
-                            className='tasklist-btn'
-                            onClick={() => setEdit(task.id)}>
-                            <AiFillEdit />
-                          </button>
-                          <span className='right'>
-                            <p>
-                              Base Price: <strong>{Number(task.price)}</strong>
-                              <button
-                                id={task.id}
-                                className='tasklist-btn'
-                                onClick={event =>
-                                  onDelete(
-                                    event,
-                                    task.subtasks && task.subtasks,
-                                  )
-                                }>
-                                <FaTrashAlt />
-                              </button>
-                            </p>
-
-                            {task.subtasks && task.subtasks.length > 0 && (
-                              <p>
-                                Total Price:{' '}
-                                <strong>
-                                  {(
-                                    Number(task.price) +
-                                    task.subtasks
-                                      .map(t => Number(t.price))
-                                      .reduce(
-                                        (accumulator, currentValue) =>
-                                          accumulator + currentValue,
-                                        0,
+                                  {task.subtasks && task.subtasks.length > 0 && (
+                                    <p>
+                                      Total Price:{' '}
+                                      <strong>
+                                        {(
+                                          Number(task.price) +
+                                          task.subtasks
+                                            .map(t => Number(t.price))
+                                            .reduce(
+                                              (accumulator, currentValue) =>
+                                                accumulator + currentValue,
+                                              0,
+                                            )
+                                        ).toFixed(2)}
+                                      </strong>
+                                    </p>
+                                  )}
+                                </td>
+                                <td>
+                                  <button
+                                    id={task.id}
+                                    className='tasklist-btn'
+                                    onClick={event =>
+                                      onDelete(
+                                        event,
+                                        task.subtasks && task.subtasks,
                                       )
-                                  ).toFixed(2)}
-                                </strong>
-                              </p>
+                                    }>
+                                    <FaTrashAlt className='task-table-trash' />
+                                  </button>
+                                </td>
+                              </>
                             )}
-                          </span>
-                        </>
-                      )}
+                          </tr>
+                        </tbody>
+                      </table>
                       {task.subtasks && task.subtasks.length > 0 && (
                         <Subtasks
                           id={id}

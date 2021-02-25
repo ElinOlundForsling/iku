@@ -7,7 +7,7 @@ interface Props {
 
 const Show: FC<Props> = ({ show, setShow }) => {
   return (
-    <div>
+    <div className='radio-show'>
       <strong>Show:</strong>
       <input
         type='radio'
