@@ -54,17 +54,26 @@ const Home: FC<Props> = ({ id }) => {
         resp.docs.forEach(docRef => {
           checkedTaskList.forEach(task => {
             if (docRef.ref.id === task.id) {
-              batch.update(docRef.ref, {
-                completed: task.completed,
-                index: task.index,
-              });
+              if (
+                docRef.data().completed !== task.completed ||
+                docRef.data().index !== task.index
+              )
+                batch.update(docRef.ref, {
+                  completed: task.completed,
+                  index: task.index,
+                });
             } else if (task.subtasks && task.subtasks.length > 0) {
               task.subtasks.forEach(subtask => {
                 if (docRef.ref.id === subtask.id) {
-                  batch.update(docRef.ref, {
-                    completed: subtask.completed,
-                    index: subtask.index,
-                  });
+                  if (
+                    docRef.data().completed !== subtask.completed ||
+                    docRef.data().index !== subtask.index
+                  ) {
+                    batch.update(docRef.ref, {
+                      completed: subtask.completed,
+                      index: subtask.index,
+                    });
+                  }
                 }
               });
             }
@@ -78,7 +87,7 @@ const Home: FC<Props> = ({ id }) => {
 
   const parentCheck = () => {
     const newTasklist = tasklist.map(task => {
-      if (task.subtasks) {
+      if (task.subtasks && task.subtasks.length > 0) {
         if (task.subtasks.every(subtask => subtask.completed)) {
           task.completed = true;
         } else if (task.subtasks.some(subtask => !subtask.completed)) {
