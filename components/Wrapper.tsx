@@ -13,12 +13,14 @@ const preloadSDKs = (firebaseApp: any) => {
 };
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 const Wrapper: FC<Props> = ({ children }) => {
-  const firebaseApp = useFirebaseApp();
-  preloadSDKs(firebaseApp);
+  if (process.browser) {
+    const firebaseApp = useFirebaseApp();
+    preloadSDKs(firebaseApp);
+  }
   return <>{children}</>;
 };
 
