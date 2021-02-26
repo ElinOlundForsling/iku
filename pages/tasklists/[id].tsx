@@ -79,7 +79,6 @@ const Home: FC<Props> = ({ id }) => {
           });
         });
         batch.commit().catch(err => console.error(err));
-        console.log('write');
       })
       .catch(error => console.error(error));
   }, [tasklist]);
