@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { encodeName } from '../util/regex';
@@ -9,6 +9,7 @@ interface CreateTaskListInput {
 }
 
 const CreateTaskList: FC = () => {
+  const [message, setMessage] = useState<string | null>(null);
   const { register, handleSubmit, errors } = useForm();
   const tasklistCollection = useFirestore().collection('tasklists');
   const router = useRouter();
@@ -18,15 +19,18 @@ const CreateTaskList: FC = () => {
     const codeName = encodeName(name);
 
     try {
+      setMessage('Creating tasklist...');
       await tasklistCollection.doc(codeName).set({ name });
       router.push(`/tasklists/${codeName}`);
     } catch (error) {
       console.error(error);
+      setMessage(`Error: ${error}. Please try again`);
     }
   };
 
   return (
     <form className='form' onSubmit={handleSubmit(createTaskList)}>
+      {message && <p className='message'>{message}</p>}
       <input
         type='text'
         id='name'
